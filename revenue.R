@@ -33,6 +33,8 @@ revenue <- within(revenue, {
 
   company <- substr(company, 1, company_name_end - 1L)
 })
+write.csv(revenue, file = "top_biomedical_companies/data/biomedical_companies_revenue.csv",
+          quote = FALSE, row.names = FALSE)
 
 ### Animation ###
 library(dplyr)
