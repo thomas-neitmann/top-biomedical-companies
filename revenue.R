@@ -43,45 +43,42 @@ library(gganimate)
 
 revenue_formatted <- revenue %>%
   group_by(year) %>%
-  mutate(revenue_with_jitter = jitter(revenue),
-         rank = rank(-revenue_with_jitter),
-         label = paste0(" $", revenue, " Bn.")) %>%
+  mutate(
+    revenue_with_jitter = jitter(revenue),
+    rank = rank(-revenue_with_jitter),
+    company = reorder(company, revenue),
+    label = paste0(" $", revenue, " Bn."),
+    highlight = case_when(
+      company == "Novartis" ~ "Novartis",
+      company == "Roche" ~ "Roche",
+      TRUE ~ "Other"
+    )
+  ) %>% 
   group_by(company) %>%
-  filter(rank <= 20) %>%
+  filter(rank <= 10) %>%
   ungroup()
 
 static_plot <- ggplot(revenue_formatted) +
-  aes(rank, group = company, fill = company, color = company) +
-  geom_tile(aes(y = revenue/2, height = revenue, width = 0.9),
-            alpha = 0.8, color = NA) +
+  aes(rank, revenue, group = company, fill = highlight) +
+  geom_col(width = 0.9, alpha = 0.8) +
   geom_text(aes(y = 0, label = paste(company, " ")), vjust = 0.2, hjust = 1, size = 7) +
   geom_text(aes(y = revenue, label = label, hjust = 0), size = 7) +
-  coord_flip(clip = "off", expand = FALSE) +
-  scale_y_continuous(labels = scales::comma) +
+  coord_flip(clip = "off") +
   scale_x_reverse() +
-  guides(color = FALSE, fill = FALSE) +
-  theme(axis.line = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "none",
-        panel.background = element_blank(),
-        panel.border = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_line(size = .1, color = "grey"),
-        panel.grid.minor.x = element_line(size = .1, color = "grey"),
-        plot.title = element_text(size = 25, hjust = 0.5, face = "bold",
-                                  colour = "grey", vjust = 0),
-        plot.background = element_blank(),
-        plot.margin = margin(2, 4, 2, 11, "cm"))
+  theme_void() +
+  theme(
+    plot.title = element_text(
+      size = 25, hjust = 0.5, face = "bold", color = "grey", vjust = 0
+    ),
+    legend.position = "none",
+    plot.margin = margin(2, 4, 2, 8, "cm")
+  ) +
+  scale_fill_manual(values = c("Other" = "lightgray", "Roche" = "#0066CC", "Novartis" = "#E8580F"))
 
 animation <- static_plot +
-  transition_states(year, transition_length = 12, state_length = 8, wrap = FALSE) +
+  transition_states(year, transition_length = 12, state_length = 8, wrap = TRUE) +
   view_follow(fixed_x = TRUE, fixed_y = TRUE)  +
   labs(title = "Year: {closest_state}")
 
 animate(animation, renderer = av_renderer("pharma_revenue.mp4"), nframes = 200,
-        fps = 20, end_pause = 32, width = 1200, height = 1000)
+        fps = 20, width = 1200, height = 1000)
