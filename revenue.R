@@ -65,20 +65,29 @@ static_plot <- ggplot(revenue_formatted) +
   geom_text(aes(y = revenue, label = label, hjust = 0), size = 7) +
   coord_flip(clip = "off") +
   scale_x_reverse() +
-  theme_void() +
+  theme_classic() +
+  ggeasy::easy_remove_axes() +
   theme(
     plot.title = element_text(
-      size = 25, hjust = 0.5, face = "bold", color = "grey", vjust = 0
+      size = 44,
+      vjust = 0,
+      hjust = 0,
+      face = "bold",
+      color = "black"
     ),
+    plot.subtitle = element_text(size = 30, margin = margin(t = 10, b = 10)),
     legend.position = "none",
     plot.margin = margin(2, 4, 2, 8, "cm")
   ) +
-  scale_fill_manual(values = c("Other" = "lightgray", "Roche" = "#0066CC", "Novartis" = "#E8580F"))
+  scale_fill_manual(values = c("Other" = "#cccccc", "Roche" = "#0066CC", "Novartis" = "#E8580F"))
 
 animation <- static_plot +
   transition_states(year, transition_length = 12, state_length = 8, wrap = TRUE) +
   view_follow(fixed_x = TRUE, fixed_y = TRUE)  +
-  labs(title = "Year: {closest_state}")
+  labs(
+    title = "Roche Surpassed Its Local Rival Novartis",
+    subtitle = "Revenue in {closest_state}"
+  )
 
 animate(animation, renderer = av_renderer("pharma_revenue.mp4"), nframes = 200,
         fps = 20, width = 1200, height = 1000)
