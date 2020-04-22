@@ -89,5 +89,5 @@ animation <- static_plot +
     subtitle = "Revenue in {closest_state}"
   )
 
-animate(animation, renderer = av_renderer("pharma_revenue.mp4"), nframes = 200,
+animate(animation, renderer = gifski_renderer("pharma_revenue.gif"), nframes = 200,
         fps = 20, width = 1200, height = 1000)
